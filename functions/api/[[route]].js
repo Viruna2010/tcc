@@ -26,28 +26,27 @@ const DISTRICTS = [
   { id: 'kegalle', nameSi: 'කෑගල්ල', lat: 7.2513, lon: 80.3464, province: 'සබරගමු' }
 ];
 
-async function fetchWeather(d) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${d.lat}&longitude=${d.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=auto`;
-  const res = await fetch(url);
-  const json = await res.json();
-  return {
+export async function onRequest() {
+  const data = DISTRICTS.map(d => ({
     ...d,
-    temp: Math.round(json.current.temperature_2m),
-    humidity: json.current.relative_humidity_2m,
-    windSpeed: json.current.wind_speed_10m,
-    conditionSi: json.current.weather_code < 3 ? "පැහැදිලියි" : "වලාකුළු සහිතයි",
-    condition: "Clear",
-    feelsLike: Math.round(json.current.temperature_2m + 2),
+    temp: Math.floor(25 + Math.random() * 8),
+    feelsLike: Math.floor(27 + Math.random() * 8),
+    humidity: Math.floor(60 + Math.random() * 20),
+    windSpeed: (Math.random() * 5).toFixed(1),
+    windDeg: Math.floor(Math.random() * 360),
+    pressure: 1000 + Math.floor(Math.random() * 20),
     visibility: 10,
-    uvIndex: 5,
+    uvIndex: Math.floor(Math.random() * 8),
     uvLevel: { label: 'මධ්‍යම', color: '#FFC107' },
-    isMock: false
-  };
-}
+    condition: 'Clear',
+    conditionSi: 'පැහැදිලියි',
+    sunrise: '06:00',
+    sunset: '18:30',
+    updatedAt: new Date().toISOString(),
+    isMock: true
+  }));
 
-export async function onRequest({ request }) {
-  const data = await Promise.all(DISTRICTS.map(fetchWeather));
-  return new Response(JSON.stringify({ success: true, data }), {
+  return new Response(JSON.stringify({ success: true, timestamp: new Date().toISOString(), data }), {
     headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
   });
 }
